@@ -31,5 +31,8 @@ namespace Bankomat1
         public virtual DbSet<Funzionalita> Funzionalita { get; set; }
         public virtual DbSet<Movimenti> Movimenti { get; set; }
         public virtual DbSet<Utenti> Utenti { get; set; }
+
+
+
     }
 }

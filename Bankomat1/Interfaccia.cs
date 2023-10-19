@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,19 +20,22 @@ namespace Bankomat1
             Uscita
         };
 
-        private SortedList<int, Banca> _banche;
-        private Banca _bancaCorrente;
+        
+        private Banche _bancaCorrente;
+        private Utenti _utenteCorrente;
 
-        public Interfaccia(SortedList<int, Banca> banche)
-        {
-            _banche = new SortedList<int, Banca>();
-        }
+        //public Interfaccia(SortedList<int, Banca> banche)
+        //{
+        //    _banche = new SortedList<int, Banca>();
+        //}
 
-        private void StampaIntestazione()
+        private void StampaIntestazione(string titolo)
         {
             Console.Clear();
             Console.WriteLine("**************************************************");
             Console.WriteLine("*              Bankomat Simulator               *");
+            Console.WriteLine("".PadLeft(titolo.Length)
+                +titolo);
             return;
         }
 
@@ -54,98 +58,84 @@ namespace Bankomat1
             return scelta;
         }
 
-        private int SchermataDiBenvenuto()
+        private int SchermataDiBenvenuto(EsercitazioneEntities ctx)
         {
             int scelta = -1;
             while (scelta == -1)
             {
-                StampaIntestazione();
+                StampaIntestazione("selezione banca");
 
-                using (var ctx = new EsercitazioneEntities())
-                {
+                
                     Console.WriteLine("lista banche:");
                     int key = 0;
-                    foreach (var banca_db in ctx.Banche)
+                    foreach (Banche banche in ctx.Banche)
                     {
+                        Console.WriteLine($"{banche.Id}-{banche.Nome}");
+
                         key++;
-                        Banca banca = new Banca();
-                        banca.Nome = banca_db.Nome;
-
-                      
-
-                        _banche.Add(key, banca);
-
-                        Console.WriteLine($"{key} - {banca_db.Nome} ");
+                     
                     }
 
-                }
-                Console.WriteLine("0 - Uscita");
+                
+                
 
-                scelta = Menu(0, _banche.Count);
+                scelta = Menu(0, key);
             }
 
             return scelta;
 
         }
 
-        //private bool Login()
-        //{
+        private bool Login(EsercitazioneEntities ctx)
+        {
 
-        //    bool autenticato = false;
+            bool autenticato = false;
 
-        //    Utente credenziali = new Utente();
-        //    Console.Write("Nome utente: ");
-        //    credenziali.NomeUtente = Console.ReadLine();
-        //    Console.Write("Password: ");
-        //    credenziali.Password = Console.ReadLine();
-        //    using (var ctx = new EsercitazioneEntities()) {
-        //        foreach (var utenti_db in banca_db.Utentis)
-        //        {
-        //            Utente utente = new Utente();
-        //            utente.NomeUtente = utenti_db.NomeUtente;
-        //            utente.Password = utenti_db.Password;
+            Utenti credenziali = new Utenti();
 
-                    
+            StampaIntestazione($"Login - {_bancaCorrente.Nome}");
 
-                    
-        //        }
+            Console.Write("Nome utente: ");
+            credenziali.NomeUtente = Console.ReadLine();
 
-        //        StampaIntestazione($"Login - {_bancaCorrente.Nome}");
+            Console.Write("Password: ");
+            credenziali.Password = Console.ReadLine();
+            int idBanca = Convert.ToInt32(_bancaCorrente.Id);
 
-            
+            EsitoLogin esitoLogin = _bancaCorrente.Login(credenziali, idBanca, out Utenti utente, ctx);
 
-        //    Banca.EsitoLogin esitoLogin =
-        //        _bancaCorrente.Login(credenziali, out Utente utente);
+                switch (esitoLogin)
+                {
+                    //case Banca.EsitoLogin.PasswordErrata:
+                    //    Console.WriteLine($"Password errata - " +
+                    //        $"{utente.TentativiDiAccessoResidui} " +
+                    //        @"tentativ{0} residu{0}", utente.TentativiDiAccessoResidui == 1 ? "o" : "i");
+                    //    Console.Write("Premere un tasto per proseguire");
+                    //    Console.ReadKey();
+                    //    break;
+                    case EsitoLogin.UtentePasswordErrati:
+                        Console.WriteLine("Utente o password errati");
+                        Console.Write("Premere un tasto per proseguire");
+                        Console.ReadKey();
+                        break;
+                    case EsitoLogin.AccountBloccato:
+                        Console.WriteLine("*** Account utente bloccato ***");
+                        Console.Write("Premere un tasto per proseguire");
+                        Console.ReadKey();
+                        break;
+                    case EsitoLogin.AccessoConsentito:
+                        _utenteCorrente = utente;
+                        autenticato = true;
+                        break;
+                }
 
-        //    switch (esitoLogin)
-        //    {
-        //        case Banca.EsitoLogin.PasswordErrata:
-        //            Console.WriteLine($"Password errata - " +
-        //                $"{utente.TentativiDiAccessoResidui} " +
-        //                @"tentativ{0} residu{0}", utente.TentativiDiAccessoResidui == 1 ? "o" : "i");
-        //            Console.Write("Premere un tasto per proseguire");
-        //            Console.ReadKey();
-        //            break;
-        //        case Banca.EsitoLogin.UtentePasswordErrati:
-        //            Console.WriteLine("Utente o password errati");
-        //            Console.Write("Premere un tasto per proseguire");
-        //            Console.ReadKey();
-        //            break;
-        //        case Banca.EsitoLogin.AccountBloccato:
-        //            Console.WriteLine("*** Account utente bloccato ***");
-        //            Console.Write("Premere un tasto per proseguire");
-        //            Console.ReadKey();
-        //            break;
-        //        case Banca.EsitoLogin.AccessoConsentito:
-        //            _bancaCorrente.UtenteCorrente = utente;
-        //            autenticato = true;
-        //            break;
-        //    }
-
-        //    return autenticato;
-        //}
-
-        public void Esegui()
+                return autenticato;
+            }
+            private Funzionalita MenuPrincipale()
+        {
+            return new Funzionalita();  
+        }
+            public void Esegui(EsercitazioneEntities ctx)
         {
             int rispostaUtente = 0;
             Richiesta richiesta = Richiesta.SchermataDiBenvenuto;
@@ -155,40 +145,40 @@ namespace Bankomat1
                 switch (richiesta)
                 {
                     case Richiesta.SchermataDiBenvenuto:
-                        rispostaUtente = SchermataDiBenvenuto();
+                        rispostaUtente = SchermataDiBenvenuto(ctx);
 
                         if (rispostaUtente == 0)
                             richiesta = Richiesta.Uscita;
                         else
                         {
 
-                            _bancaCorrente = _banche[rispostaUtente];
+                            _bancaCorrente = ctx.Banche.FirstOrDefault(b => b.Id == rispostaUtente);
                             richiesta = Richiesta.Login;
                         }
                         break;
-                    //case Richiesta.Login:
-                    //    if (Login())
-                    //        richiesta = Richiesta.MenuPrincipale;
-                    //    else
-                    //        richiesta = Richiesta.SchermataDiBenvenuto;
-                    //    break;
-                        //case Richiesta.MenuPrincipale:
-                        //    switch (MenuPrincipale())
-                        //    {
-                        //        case Banca.Funzionalita.Uscita:
-                        //            richiesta = Richiesta.SchermataDiBenvenuto;
-                        //            break;
-                        //        case Banca.Funzionalita.Versamento:
-                        //            richiesta = Richiesta.Versamento;
-                        //            break;
-                        //        case Banca.Funzionalita.ReportSaldo:
-                        //            richiesta = Richiesta.ReportSaldo;
-                        //            break;
-                        //        case Banca.Funzionalita.Prelievo:
-                        //            richiesta = Richiesta.Prelievo;
-                        //            break;
-                        //    }
-                        //    break;
+                    case Richiesta.Login:
+                        if (Login(ctx))
+                            richiesta = Richiesta.MenuPrincipale;
+                        else
+                            richiesta = Richiesta.SchermataDiBenvenuto;
+                        break;
+                    case Richiesta.MenuPrincipale:
+                        switch (MenuPrincipale())
+                        {
+                            //        case Banca.Funzionalita.Uscita:
+                            //            richiesta = Richiesta.SchermataDiBenvenuto;
+                            //            break;
+                            //        case Banca.Funzionalita.Versamento:
+                            //            richiesta = Richiesta.Versamento;
+                            //            break;
+                            //        case Banca.Funzionalita.ReportSaldo:
+                            //            richiesta = Richiesta.ReportSaldo;
+                            //            break;
+                            //        case Banca.Funzionalita.Prelievo:
+                            //            richiesta = Richiesta.Prelievo;
+                            //            break;
+                        }
+                        break;
                         //case Richiesta.Versamento:
                         //    bool esito = Versamento();
                         //    if (esito && _bancaCorrente.ElencoFunzionalita

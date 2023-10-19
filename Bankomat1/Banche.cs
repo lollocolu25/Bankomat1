@@ -11,7 +11,15 @@ namespace Bankomat1
 {
     using System;
     using System.Collections.Generic;
-    
+    using System.Linq;
+
+    public enum EsitoLogin
+    {
+        AccessoConsentito,
+        UtentePasswordErrati,
+        PasswordErrata,
+        AccountBloccato
+    }
     public partial class Banche
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
@@ -20,13 +28,59 @@ namespace Bankomat1
             this.Banche_Funzionalita = new HashSet<Banche_Funzionalita>();
             this.Utenti = new HashSet<Utenti>();
         }
-    
+
         public long Id { get; set; }
         public string Nome { get; set; }
-    
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Banche_Funzionalita> Banche_Funzionalita { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Utenti> Utenti { get; set; }
+
+        public EsitoLogin Login(Utenti credenziali, int bancaId, out Utenti utente,  EsercitazioneEntities ctx)
+        {
+
+            
+
+            utente = null;
+            //Utente utente1= new Utente();
+            var ute = ctx.Utenti.FirstOrDefault(u => u.NomeUtente == credenziali.NomeUtente && u.IdBanca == bancaId);
+            if (ute == null)
+            {
+                return EsitoLogin.UtentePasswordErrati;
+            }
+
+            Utente utente1 = new Utente(ute.NomeUtente, ute.Password, ute.Bloccato, bancaId);
+
+
+            if (utente1.ControlloSeBloccato())
+            {
+                return EsitoLogin.AccountBloccato;
+            }
+
+
+            if (credenziali.Password != ute.Password)
+            {
+                utente = ute;
+                
+            }
+
+            if (ute.Password == credenziali.Password)
+            {
+                return EsitoLogin.AccessoConsentito;
+            }
+
+
+            if (ute == null)
+            {
+                return EsitoLogin.UtentePasswordErrati;
+            }
+            else
+            {
+                utente = ute;
+                return EsitoLogin.AccessoConsentito;
+            }
+
+        }
     }
 }

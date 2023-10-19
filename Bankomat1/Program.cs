@@ -31,14 +31,14 @@ namespace Bankomat1
    
     class Program
     {
-        static SortedList<int, Banca> _banche;
-        static SqlConnection sqlConnection;
-
+        
+        
 
         static void Main(string[] args)
         {
-            Interfaccia interfacciaUtente = new Interfaccia(_banche);
-            interfacciaUtente.Esegui();
+            var ctx = new EsercitazioneEntities();
+            Interfaccia interfacciautente = new Interfaccia();
+            interfacciautente.Esegui(ctx);
         }
 
     }
