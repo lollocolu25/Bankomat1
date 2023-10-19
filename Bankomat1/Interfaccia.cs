@@ -131,10 +131,7 @@ namespace Bankomat1
 
                 return autenticato;
             }
-            private Funzionalita MenuPrincipale()
-        {
-            return new Funzionalita();  
-        }
+
             public void Esegui(EsercitazioneEntities ctx)
         {
             int rispostaUtente = 0;
@@ -162,23 +159,23 @@ namespace Bankomat1
                         else
                             richiesta = Richiesta.SchermataDiBenvenuto;
                         break;
-                    case Richiesta.MenuPrincipale:
-                        switch (MenuPrincipale())
-                        {
-                            //        case Banca.Funzionalita.Uscita:
-                            //            richiesta = Richiesta.SchermataDiBenvenuto;
-                            //            break;
-                            //        case Banca.Funzionalita.Versamento:
-                            //            richiesta = Richiesta.Versamento;
-                            //            break;
-                            //        case Banca.Funzionalita.ReportSaldo:
-                            //            richiesta = Richiesta.ReportSaldo;
-                            //            break;
-                            //        case Banca.Funzionalita.Prelievo:
-                            //            richiesta = Richiesta.Prelievo;
-                            //            break;
-                        }
-                        break;
+                        //case Richiesta.MenuPrincipale:
+                        //    switch (MenuPrincipale())
+                        //    {
+                        //        case Banca.Funzionalita.Uscita:
+                        //            richiesta = Richiesta.SchermataDiBenvenuto;
+                        //            break;
+                        //        case Banca.Funzionalita.Versamento:
+                        //            richiesta = Richiesta.Versamento;
+                        //            break;
+                        //        case Banca.Funzionalita.ReportSaldo:
+                        //            richiesta = Richiesta.ReportSaldo;
+                        //            break;
+                        //        case Banca.Funzionalita.Prelievo:
+                        //            richiesta = Richiesta.Prelievo;
+                        //            break;
+                        //    }
+                        //    break;
                         //case Richiesta.Versamento:
                         //    bool esito = Versamento();
                         //    if (esito && _bancaCorrente.ElencoFunzionalita

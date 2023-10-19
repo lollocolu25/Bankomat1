@@ -31,9 +31,6 @@ namespace Bankomat1
    
     class Program
     {
-        
-        
-
         static void Main(string[] args)
         {
             var ctx = new EsercitazioneEntities();
